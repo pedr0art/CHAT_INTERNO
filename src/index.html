@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Profissional</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="login">
+        <h2>Bem-vindo ao Chat</h2>
+        <input type="text" id="usernameInput" placeholder="Digite seu nome" />
+        <button id="loginButton">Entrar</button>
+    </div>
+
+    <!-- Interface do Chat -->
+    <div id="chat" style="display: none;">
+        <h1>Chat</h1>
+        <div id="messages"></div>
+        <div id="inputArea">
+            <input type="text" id="messageInput" placeholder="Digite uma mensagem..." />
+            <button id="sendButton">Enviar</button>
+        </div>
+    </div>
+
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:3000');
+
+        // Elementos da interface
+        const loginDiv = document.getElementById('login');
+        const chatDiv = document.getElementById('chat');
+        const usernameInput = document.getElementById('usernameInput');
+        const loginButton = document.getElementById('loginButton');
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // Função para adicionar uma mensagem ao chat
+        function addMessage(data) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${data.user}: ${data.text}`;
+            messageElement.classList.add('message', data.user === usernameInput.value ? 'user' : 'other');
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Rolagem automática
+        }
+
+        // Evento de login
+        loginButton.addEventListener('click', () => {
+            const username = usernameInput.value;
+            if (username) {
+                socket.emit('login', username);
+                loginDiv.style.display = 'none';
+                chatDiv.style.display = 'block';
+            }
+        });
+
+        // Evento de enviar mensagem
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            if (message) {
+                socket.emit('chat message', { text: message, user: usernameInput.value });
+                messageInput.value = '';
+            }
+        });
+
+        // Receber mensagens do servidor
+        socket.on('chat message', (data) => {
+            addMessage(data);
+        });
+
+        // Notificar quando um usuário entra ou sai
+        socket.on('user joined', (message) => {
+            const notificationElement = document.createElement('div');
+            notificationElement.textContent = message;
+            notificationElement.classList.add('notification');
+            messagesDiv.appendChild(notificationElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+
+        socket.on('user left', (message) => {
+            const notificationElement = document.createElement('div');
+            notificationElement.textContent = message;
+            notificationElement.classList.add('notification');
+            messagesDiv.appendChild(notificationElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+
+        // Dentro do <script> do index.html
+        socket.on('load messages', (messages) => {
+            messages.forEach((msg) => {
+                addMessage({ user: msg.user, text: msg.text });
+            });
+        });
+    </script>
+</body>
+</html>

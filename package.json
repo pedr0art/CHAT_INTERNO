@@ -1,0 +1,45 @@
+{
+  "name": "iterma_projeto",
+  "version": "1.0.0",
+  "description": "Aplicativo de conversa entre setores da estatal ITERMA",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.example.chatapp",
+    "productName": "Chat App",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedr0art/ITERMA_PROJETO.git"
+  },
+  "author": "Orinn Studio",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pedr0art/ITERMA_PROJETO/issues"
+  },
+  "homepage": "https://github.com/pedr0art/ITERMA_PROJETO#readme",
+  "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.7"
+  }
+}
