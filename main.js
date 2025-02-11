@@ -5,14 +5,18 @@ function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        // Removido fullscreen: true
+        autoHideMenuBar: true, // Ocultar a barra de menu (opcional)
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
         },
     });
 
-    // Load your chat application (you can use a local file or a server URL)
-    mainWindow.loadFile('./src/index.html'); // Or load a URL like mainWindow.loadURL('http://localhost:3000')
+    // Maximizar a janela ao iniciar
+    //mainWindow.maximize();
+
+    mainWindow.loadFile('./src/index.html');
 }
 
 app.whenReady().then(createWindow);

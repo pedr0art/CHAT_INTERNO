@@ -56,7 +56,20 @@ io.on('connection', (socket) => {
             delete users[socket.id];
         }
     });
-});
+
+        // Apagar o histórico de mensagens
+        socket.on('clear history', () => {
+            db.run('DELETE FROM messages', (err) => {
+                if (err) {
+                    console.error('Erro ao apagar o histórico:', err.message);
+                    socket.emit('clear history error', 'Erro ao apagar o histórico.');
+                } else {
+                    console.log('Histórico de mensagens apagado.');
+                    io.emit('history cleared'); // Notificar todos os clientes
+                }
+            });
+        });
+    });
 
 server.listen(3000, () => {
     console.log('Servidor rodando na porta 3000');

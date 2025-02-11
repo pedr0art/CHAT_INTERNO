@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Profissional</title>
+    <title>Chat ITERMA</title>
     <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
@@ -17,6 +17,7 @@
     <!-- Interface do Chat -->
     <div id="chat" style="display: none;">
         <h1>Chat</h1>
+        <button id="clearHistoryButton">Apagar Histórico</button>
         <div id="messages"></div>
         <div id="inputArea">
             <input type="text" id="messageInput" placeholder="Digite uma mensagem..." />
@@ -37,34 +38,68 @@
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
+        const clearHistoryButton = document.getElementById('clearHistoryButton');
 
         // Função para adicionar uma mensagem ao chat
-        function addMessage(data) {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = `${data.user}: ${data.text}`;
-            messageElement.classList.add('message', data.user === usernameInput.value ? 'user' : 'other');
-            messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Rolagem automática
+// Função para adicionar uma mensagem ao chat
+    function addMessage(data) {
+        const messageElement = document.createElement('div');
+        messageElement.textContent = `${data.user}: ${data.text}`;
+
+        // Verifica se a mensagem é do usuário atual ou de outro usuário
+        if (data.user === usernameInput.value) {
+            messageElement.classList.add('message', 'user'); // Remetente (direita)
+        } else {
+            messageElement.classList.add('message', 'other'); // Destinatário (esquerda)
         }
+
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Rolagem automática
+    }
 
         // Evento de login
         loginButton.addEventListener('click', () => {
+            login();
+        });
+
+        // Evento de tecla Enter no campo de nome de usuário
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+
+        // Função para fazer login
+        function login() {
             const username = usernameInput.value;
             if (username) {
                 socket.emit('login', username);
                 loginDiv.style.display = 'none';
                 chatDiv.style.display = 'block';
+                messageInput.focus(); // Focar no campo de mensagem após o login
             }
-        });
+        }
 
         // Evento de enviar mensagem
         sendButton.addEventListener('click', () => {
+            sendMessage();
+        });
+
+        // Evento de tecla Enter no campo de mensagem
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Função para enviar mensagem
+        function sendMessage() {
             const message = messageInput.value;
             if (message) {
                 socket.emit('chat message', { text: message, user: usernameInput.value });
                 messageInput.value = '';
             }
-        });
+        }
 
         // Receber mensagens do servidor
         socket.on('chat message', (data) => {
@@ -88,11 +123,29 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
 
-        // Dentro do <script> do index.html
+        // Carregar mensagens antigas
         socket.on('load messages', (messages) => {
             messages.forEach((msg) => {
                 addMessage({ user: msg.user, text: msg.text });
             });
+        });
+
+        // Evento para apagar o histórico de mensagens
+        clearHistoryButton.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja apagar o histórico de mensagens?')) {
+                socket.emit('clear history');
+            }
+        });
+
+        // Atualizar a interface quando o histórico for apagado
+        socket.on('history cleared', () => {
+            messagesDiv.innerHTML = ''; // Limpa a interface do chat
+            alert('Histórico de mensagens apagado com sucesso!');
+        });
+
+        // Lidar com erros ao apagar o histórico
+        socket.on('clear history error', (errorMessage) => {
+            alert(errorMessage);
         });
     </script>
 </body>

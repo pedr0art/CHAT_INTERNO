@@ -38,20 +38,34 @@ body {
 }
 
 #chat {
-    width: 400px;
-    height: 500px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     padding: 10px;
+    box-sizing: border-box;
+}
+
+#clearHistoryButton {
+    padding: 10px 20px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#clearHistoryButton:hover {
+    background-color: #c82333;
 }
 
 #messages {
     flex: 1;
     overflow-y: auto;
     margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
 #inputArea {
@@ -82,20 +96,21 @@ body {
 .message {
     padding: 10px;
     margin: 5px 0;
-    border-radius: 5px;
+    border-radius: 10px;
     max-width: 70%;
+    word-wrap: break-word;
 }
 
 .message.user {
     background-color: #007bff;
     color: white;
-    align-self: flex-end;
+    align-self: flex-end; /* Remetente (direita) */
 }
 
 .message.other {
     background-color: #e1e1e1;
     color: black;
-    align-self: flex-start;
+    align-self: flex-start; /* Destinatário (esquerda) */
 }
 
 .notification {
