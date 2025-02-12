@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -23,9 +24,66 @@ io.on('connection', (socket) => {
     });
 
     // Quando um usuário faz login
-    socket.on('login', (username) => {
-        users[socket.id] = username;
-        io.emit('user joined', `${username} entrou no chat.`);
+    socket.on('login', (credentials, callback) => {
+        const { username, password } = credentials;
+    
+        console.log('Recebido pedido de login para:', username); // Log de depuração
+    
+        db.get(
+            'SELECT * FROM users WHERE username = ?',
+            [username],
+            (err, row) => {
+                if (err) {
+                    console.error('Erro ao buscar usuário:', err.message);
+                    callback(false);
+                } else if (row) {
+                    console.log('Usuário encontrado:', row); // Log de depuração
+                    if (row.password === password) {
+                        users[socket.id] = username;
+                        io.emit('user joined', `${username} entrou no chat.`);
+                        callback(true);
+                    } else {
+                        console.log('Senha incorreta para:', username); // Log de depuração
+                        callback(false);
+                    }
+                } else {
+                    console.log('Usuário não encontrado:', username); // Log de depuração
+                    callback(false);
+                }
+            }
+        );
+    });
+    // Quando um usuário faz cadastro
+    socket.on('signup', (credentials, callback) => {
+        const { username, password, sector } = credentials;
+
+        // Verificar se o usuário já existe
+        db.get(
+            'SELECT * FROM users WHERE username = ?',
+            [username],
+            (err, row) => {
+                if (err) {
+                    console.error('Erro ao buscar usuário:', err.message);
+                    callback(false);
+                } else if (row) {
+                    callback(false); // Usuário já existe
+                } else {
+                    // Criar novo usuário
+                    db.run(
+                        'INSERT INTO users (username, password, sector) VALUES (?, ?, ?)',
+                        [username, password, sector],
+                        (err) => {
+                            if (err) {
+                                console.error('Erro ao criar usuário:', err.message);
+                                callback(false);
+                            } else {
+                                callback(true);
+                            }
+                        }
+                    );
+                }
+            }
+        );
     });
 
     // Quando uma mensagem é enviada
@@ -57,19 +115,7 @@ io.on('connection', (socket) => {
         }
     });
 
-        // Apagar o histórico de mensagens
-        socket.on('clear history', () => {
-            db.run('DELETE FROM messages', (err) => {
-                if (err) {
-                    console.error('Erro ao apagar o histórico:', err.message);
-                    socket.emit('clear history error', 'Erro ao apagar o histórico.');
-                } else {
-                    console.log('Histórico de mensagens apagado.');
-                    io.emit('history cleared'); // Notificar todos os clientes
-                }
-            });
-        });
-    });
+});
 
 server.listen(3000, () => {
     console.log('Servidor rodando na porta 3000');

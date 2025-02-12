@@ -10,143 +10,46 @@
     <!-- Tela de Login -->
     <div id="login">
         <h2>Bem-vindo ao Chat</h2>
-        <input type="text" id="usernameInput" placeholder="Digite seu nome" />
-        <button id="loginButton">Entrar</button>
+        <form id="loginForm">
+            <input type="text" id="usernameInput" placeholder="Digite seu nome" required />
+            <input type="password" id="passwordInput" placeholder="Digite sua senha" required />
+            <button type="submit">Entrar</button>
+            <button type="button" id="goToSignupButton">Criar uma conta</button>
+        </form>
+    </div>
+
+    <!-- Tela de Cadastro -->
+    <div id="signup" style="display: none;">
+        <h2>Criar uma Conta</h2>
+        <form id="signupForm">
+            <input type="text" id="signupUsernameInput" placeholder="Digite seu nome" required />
+            <input type="password" id="signupPasswordInput" placeholder="Digite sua senha" required />
+            <select id="signupSectorInput" required>
+                <option value="" disabled selected>Selecione seu setor</option>
+                <option value="TI">TI</option>
+                <option value="RH">RH</option>
+                <option value="Financeiro">Financeiro</option>
+                <option value="Produção">Produção</option>
+            </select>
+            <button type="submit">Criar Conta</button>
+            <button type="button" id="goToLoginButton">Voltar para o Login</button>
+        </form>
     </div>
 
     <!-- Interface do Chat -->
     <div id="chat" style="display: none;">
         <h1>Chat</h1>
-        <button id="clearHistoryButton">Apagar Histórico</button>
         <div id="messages"></div>
         <div id="inputArea">
             <input type="text" id="messageInput" placeholder="Digite uma mensagem..." />
             <button id="sendButton">Enviar</button>
         </div>
     </div>
-
     <!-- Socket.IO -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script>
-        const socket = io('http://localhost:3000');
-
-        // Elementos da interface
-        const loginDiv = document.getElementById('login');
-        const chatDiv = document.getElementById('chat');
-        const usernameInput = document.getElementById('usernameInput');
-        const loginButton = document.getElementById('loginButton');
-        const messagesDiv = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const clearHistoryButton = document.getElementById('clearHistoryButton');
-
-        // Função para adicionar uma mensagem ao chat
-// Função para adicionar uma mensagem ao chat
-    function addMessage(data) {
-        const messageElement = document.createElement('div');
-        messageElement.textContent = `${data.user}: ${data.text}`;
-
-        // Verifica se a mensagem é do usuário atual ou de outro usuário
-        if (data.user === usernameInput.value) {
-            messageElement.classList.add('message', 'user'); // Remetente (direita)
-        } else {
-            messageElement.classList.add('message', 'other'); // Destinatário (esquerda)
-        }
-
-        messagesDiv.appendChild(messageElement);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Rolagem automática
-    }
-
-        // Evento de login
-        loginButton.addEventListener('click', () => {
-            login();
-        });
-
-        // Evento de tecla Enter no campo de nome de usuário
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                login();
-            }
-        });
-
-        // Função para fazer login
-        function login() {
-            const username = usernameInput.value;
-            if (username) {
-                socket.emit('login', username);
-                loginDiv.style.display = 'none';
-                chatDiv.style.display = 'block';
-                messageInput.focus(); // Focar no campo de mensagem após o login
-            }
-        }
-
-        // Evento de enviar mensagem
-        sendButton.addEventListener('click', () => {
-            sendMessage();
-        });
-
-        // Evento de tecla Enter no campo de mensagem
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Função para enviar mensagem
-        function sendMessage() {
-            const message = messageInput.value;
-            if (message) {
-                socket.emit('chat message', { text: message, user: usernameInput.value });
-                messageInput.value = '';
-            }
-        }
-
-        // Receber mensagens do servidor
-        socket.on('chat message', (data) => {
-            addMessage(data);
-        });
-
-        // Notificar quando um usuário entra ou sai
-        socket.on('user joined', (message) => {
-            const notificationElement = document.createElement('div');
-            notificationElement.textContent = message;
-            notificationElement.classList.add('notification');
-            messagesDiv.appendChild(notificationElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        });
-
-        socket.on('user left', (message) => {
-            const notificationElement = document.createElement('div');
-            notificationElement.textContent = message;
-            notificationElement.classList.add('notification');
-            messagesDiv.appendChild(notificationElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        });
-
-        // Carregar mensagens antigas
-        socket.on('load messages', (messages) => {
-            messages.forEach((msg) => {
-                addMessage({ user: msg.user, text: msg.text });
-            });
-        });
-
-        // Evento para apagar o histórico de mensagens
-        clearHistoryButton.addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja apagar o histórico de mensagens?')) {
-                socket.emit('clear history');
-            }
-        });
-
-        // Atualizar a interface quando o histórico for apagado
-        socket.on('history cleared', () => {
-            messagesDiv.innerHTML = ''; // Limpa a interface do chat
-            alert('Histórico de mensagens apagado com sucesso!');
-        });
-
-        // Lidar com erros ao apagar o histórico
-        socket.on('clear history error', (errorMessage) => {
-            alert(errorMessage);
-        });
-    </script>
+    <!-- Importação dos módulos -->
+    <script type="module" src="./js/domHandler.js"></script>
+    <script type="module" src="./js/socketHandler.js"></script>
+    <script type="module" src="./js/chat.js"></script>
 </body>
 </html>

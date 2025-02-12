@@ -7,6 +7,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    overflow: hidden; /* Impede a rolagem da página inteira */
 }
 
 #login {
@@ -44,6 +45,7 @@ body {
     flex-direction: column;
     padding: 10px;
     box-sizing: border-box;
+    position: relative; /* Para posicionar a área de entrada */
 }
 
 #clearHistoryButton {
@@ -62,24 +64,35 @@ body {
 
 #messages {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* Torna as mensagens roláveis */
     margin-bottom: 10px;
     display: flex;
     flex-direction: column;
+    padding-bottom: 70px; /* Espaço para a área de entrada */
+    max-height: calc(100vh - 200px); /* Limita a altura para garantir o scroll */
 }
 
 #inputArea {
     display: flex;
+    position: fixed; /* Fixa a barra de texto na parte inferior */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
 }
-
 #messageInput {
     flex: 1;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-right: 10px;
+    background-color: #fff; /* Garantir que o fundo seja branco */
+    color: #000; /* Garantir que o texto seja preto */
+    opacity: 1; /* Garantir que o campo não esteja transparente */
+    pointer-events: auto; /* Garantir que o campo não esteja desabilitado */
 }
-
 #sendButton {
     padding: 10px 20px;
     background-color: #007bff;
